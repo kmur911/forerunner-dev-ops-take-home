@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16.0
+    environment:
+      POSTGRES_USER: ${PG_USER:-forerunner}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-forerunner_password}
+      POSTGRES_DB: ${PGDATABASE:-forerunner}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  app:
+    image: ${APP_IMAGE:-forerunner-app}:${APP_ENV:-development}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${APP_ENV:-development}
+    environment:
+      PORT: ${PORT:-3000}
+      PG_USER: ${PG_USER:-forerunner}
+      PG_PASSWORD: ${PG_PASSWORD:-forerunner_password}
+      PGDATABASE: ${PGDATABASE:-forerunner}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:${PORT:-3000}"
+
+volumes:
+  postgres-data:
