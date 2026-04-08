@@ -40,7 +40,7 @@ The only non-Docker dependency I rely on for the convenience commands is `make`.
 Build the development image:
 
 ```bash
-make build-development
+make build-dev
 ```
 
 Build the staging image:
@@ -52,7 +52,7 @@ make build-staging
 Build the production image:
 
 ```bash
-make build-production
+make build-prod
 ```
 
 These commands produce the following tags by default:
@@ -63,7 +63,7 @@ These commands produce the following tags by default:
 If you want a different repository name, override `APP_IMAGE`:
 
 ```bash
-make build-production APP_IMAGE=my-app
+make build-prod APP_IMAGE=my-app
 ```
 
 ## Run Instructions
@@ -73,7 +73,7 @@ make build-production APP_IMAGE=my-app
 Start the development environment:
 
 ```bash
-make up-development
+make up-dev
 ```
 
 This starts:
@@ -101,7 +101,7 @@ This uses the `staging` image tag and starts the app with the `--debug` flag.
 ### Run production locally with Docker Compose
 
 ```bash
-make up-production
+make up-prod
 ```
 
 This uses the `production` image tag and includes `sysstat` in the app image.
@@ -120,7 +120,7 @@ ports:
 Example:
 
 ```bash
-PORT=4000 make up-development
+PORT=4000 make up-dev
 ```
 
 In that case, the app listens on port `4000` inside the container but is still available on:
@@ -205,7 +205,7 @@ The final runtime stages switch to `USER node`.
 
 This is not required for functionality, but it is a low-cost security hardening step because the application does not need root privileges to listen on its configured port or serve requests.
 
-## Resources Used
+## Resources/Approach Used
 
 - The take-home assignment PDF provided by Forerunner
 - The provided public GitHub repository for the application source
@@ -213,9 +213,13 @@ This is not required for functionality, but it is a low-cost security hardening 
 - ChatGPT
 
 I used ChatGPT heavily for this, asking it to look at the github repo and generate the Dockerfile, docker-compose, Makefile and README per the instructions. Then I went through each and sanity checked the following:
-- the Dockerfile was balancing readability, image size (slim base images and only copying node_modules to the runtime image) and intelligent layer ordering for caching (copying application files after running apt-get installs)
+
+- the Dockerfile was balancing readability, image size (slim base images and only copying node_modules to the runtime image) and intelligent layer ordering for caching (copying application files after running apt-get installs, etc)
+
 - the docker-compose file had common sense volume names, the ports were mapped correctly, the health checks were well calibrated to make sure the db spun up before the app, and the image names matched the images built directly from the Dockerfile so we wouldn't have the local env cluttered up with duplicates
-- the Makefile is a little more crowded than I would normally start with, I wouldn't have separate up commands for all the environments or possibly even separate ones for all the build environments but I'm trying to keep to what the assignment asked. Given my preference i'd just have make build, up and down associated with dev, since that's what people are likely to run locally, and only add the others if people are really running staging and prod locally for debug purposes frequently.
+
+- the Makefile is pretty straightforward
+
 - the README I just went through to chop out AI slop as much as possible
 
 ## Feedback on the Assignment
