@@ -4,7 +4,7 @@ ARG NODE_IMAGE=node:20.5.0-bullseye-slim
 
 FROM ${NODE_IMAGE} AS deps-base
 WORKDIR /app
-COPY build/package.json build/package-lock.json ./
+COPY build/ ./
 COPY --chmod=0755 build/build.sh ./
 
 FROM deps-base AS deps-production
@@ -18,11 +18,11 @@ RUN ./build.sh
 FROM ${NODE_IMAGE} AS runtime-base
 WORKDIR /app
 ENV PORT=3000
-COPY app/server.js ./
+COPY app/ ./
 COPY --chmod=0755 app/run.sh ./
 ENTRYPOINT ["./run.sh"]
 HEALTHCHECK --interval=5s --timeout=3s --start-period=125s --retries=3 \
-  CMD ["node", "-e", "const http=require('http');const port=process.env.PORT||3000;const req=http.get({host:'127.0.0.1',port,path:'/healthcheck'},res=>process.exit(res.statusCode===200?0:1));req.on('error',()=>process.exit(1));"]
+  CMD ["node", "./healthcheck.js"]
 EXPOSE 3000
 
 FROM runtime-base AS production
